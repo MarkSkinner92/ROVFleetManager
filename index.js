@@ -57,5 +57,5 @@ io.on('connection', (socket) => {
 // Start the server
 const PORT = 80;
 server.listen(PORT, () => {
-  console.log(`Server started on http://localhost:${PORT}`);
+  console.log(`Server started on http://0.0.0.0:${PORT}`);
 });
