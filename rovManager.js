@@ -202,6 +202,14 @@
                 });
             }
         }
+        powerOff(){
+            axios.post(`http://${this.preferredIp}:9100/v1.0/shutdown`, null, {params:{
+                i_know_what_i_am_doing: true,
+                "shutdown_type": "poweroff"
+            }}).catch(err => {
+                console.log("Error posting name:",err);
+            });
+        }
         setNotes(data, pushToRov){
             this.notes = data;
             this.sendProperty({notes: this.notes});
@@ -313,6 +321,9 @@
                 break;
             case 'timerReset':
                 rov.timer.stop();
+                break;
+            case 'powerOff':
+                rov.powerOff();
                 break;
             case 'selectIp':
                 rov.setpreferredIp(data);

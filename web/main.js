@@ -186,6 +186,12 @@ function enableScanning(){
     document.getElementById('ipString').disabled = false;
 }
 
+function powerOffAll(){
+    rovs.forEach(rov => {
+        triggerUserAction(rov.id, "powerOff");
+    });
+}
+
 socket.on('connect', () => {
     console.log('Connected to server');
 });
