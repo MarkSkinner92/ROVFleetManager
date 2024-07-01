@@ -1,4 +1,4 @@
-const socket = io('http://localhost:3000'); // Connect to Socket.IO server
+const socket = io('http://' + window.location.hostname); // Connect to Socket.IO server
 
 class ROV{
     constructor(id, state){
