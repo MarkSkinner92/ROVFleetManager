@@ -13,6 +13,7 @@
 
             let numReceived = 0;
             ips.forEach(ip => {
+                console.log("fetching:",ip);
                 fetchRovId(ip)
                 .then(result => {
                     numReceived++;

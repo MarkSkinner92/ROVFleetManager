@@ -38,16 +38,10 @@ io.on('connection', (socket) => {
         //     'rov-erysu0x2': { ips: [ '192.168.1.185' ] },
         // })
         // rovManager.sendFullStateTo(io);
-
+        console.log("scanning...");
         scanner.scan(ipRange).then( result => {
+            console.log("got scan results");
             rovManager.mergeScanResults(result);
-            // let testResults = {};
-
-            // if(Math.random() > 0.5) testResults["rov-1"] = {ips:["192.168.1.4","192.168.1.78"]};
-            // if(Math.random() > 0.5) testResults["rov-2"] = {ips:["192.168.1.5","192.168.1.79"]};
-            // if(Math.random() > 0.5) testResults["rov-3"] = {ips:["192.168.1.6","192.168.1.80"]};
-
-            // rovManager.mergeScanResults(testResults)
             rovManager.sendFullStateTo(io);
         });
 
