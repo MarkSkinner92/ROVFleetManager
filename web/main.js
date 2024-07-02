@@ -66,12 +66,12 @@ class ROV{
     }
 
     mergeState(state){
-        if(state.name) this._name.value = state.name;
-        if(state.uptime) this._uptime.innerText = state.uptime;
-        if(state.mdns) this._mdns.value = state.mdns;
-        if(state.notes) this._notesBox.value = state.notes;
-        if(state.timerText) this._timerText.innerText = state.timerText;
-        if(state.timerState){
+        if(state.hasOwnProperty("name")) this._name.value = state.name;
+        if(state.hasOwnProperty("uptime")) this._uptime.innerText = state.uptime;
+        if(state.hasOwnProperty("mdns")) this._mdns.value = state.mdns;
+        if(state.hasOwnProperty("notes")) this._notesBox.value = state.notes;
+        if(state.hasOwnProperty("timerText")) this._timerText.innerText = state.timerText;
+        if(state.hasOwnProperty("timerState")){
             switch(state.timerState){
                 case "running":
                     this._timerStartPause.innerText = 'Pause';
@@ -82,12 +82,12 @@ class ROV{
                     break;
             }
         }
-        if(state.thumbnail){
+        if(state.hasOwnProperty("thumbnail")){
             this._thumbnailImage.src = URL.createObjectURL(new Blob([state.thumbnail], { type: 'application/octet-stream' }));
             this._thumbnailImage.style.display = "";
             this._thumbnailSplash.style.display = "none";
         }
-        if(state.ips) this.mergeNewIps(state.ips, state.preferredIp);
+        if(state.hasOwnProperty("ips")) this.mergeNewIps(state.ips, state.preferredIp);
     }
 
     mergeNewIps(ips, preferredIp){
