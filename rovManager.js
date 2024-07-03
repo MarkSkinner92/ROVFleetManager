@@ -84,7 +84,7 @@
             // Start heartbeat + thumbnail
             this.intervals.push(setInterval(()=>{
                 this.getHeartbeat();
-            }, 2000));
+            }, 4000));
 
             this.intervals.push(setInterval(()=>{
                 this.getUptime();
@@ -133,7 +133,11 @@
 
         // when response comes in, broadcast to all sockets
         getHeartbeat(){
-            console.log(this.id,"asking for heartbeat")
+            axios.get(`http://${this.preferredIp}/commander`,{timeout: 4000}).then(result => {
+                this.sendProperty({connected: true});
+            }).catch((error) => {
+                this.sendProperty({connected: false});
+            })
         }
         getUptime(){
             let params = {

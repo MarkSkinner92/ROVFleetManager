@@ -70,6 +70,7 @@ class ROV{
         if(state.hasOwnProperty("uptime")) this._uptime.innerText = state.uptime;
         if(state.hasOwnProperty("mdns")) this._mdns.value = state.mdns;
         if(state.hasOwnProperty("notes")) this._notesBox.value = state.notes;
+        if(state.hasOwnProperty("connected")) this.setConnectionStatus(state.connected);
         if(state.hasOwnProperty("timerText")) this._timerText.innerText = state.timerText;
         if(state.hasOwnProperty("timerState")){
             switch(state.timerState){
@@ -105,6 +106,19 @@ class ROV{
     remove(){
         this.ui.remove();
         this.removed = true;
+    }
+
+    setOpacity(opacity){
+        this.ui.style.filter = `opacity(${opacity})`;
+    }
+
+    setConnectionStatus(statusBool){
+        this.ui.querySelector('.connectionStatus').style.display = statusBool ? "none" : "";
+        if(statusBool){
+            this.setOpacity(1);
+        }else{
+            this.setOpacity(0.4);
+        }
     }
 }
 
@@ -187,9 +201,12 @@ function enableScanning(){
 }
 
 function powerOffAll(){
-    rovs.forEach(rov => {
-        triggerUserAction(rov.id, "powerOff");
-    });
+    for(let i = 0; i < rovs.length; i++){
+        if(rovs[i]){
+            console.log(rovs[i].id,"powering off");
+            triggerUserAction(rovs[i].id, "powerOff");
+        }
+    }
 }
 
 socket.on('connect', () => {
