@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <h1 class='title'>ROV Fleet Manager</h1>
+        <title>ROV Fleet Manager</title>
         <link rel= "stylesheet" type= "text/css" href= "style.css">
         <script src="https://cdn.socket.io/4.3.1/socket.io.js"></script> <!-- Include Socket.IO client library -->
         
     </head>
     <body>
         <div class='ROVheader'>
+            <p class='title inlinetext'>ROV Fleet Manager</p>
             <input id="ipString" class="inlineText" value="192.168.1.[1-255]">
             <button id='scanButton' onclick="scan()">Scan</button>
             <img id="spinner" src="loading.gif" style="height:20px; display: none;">

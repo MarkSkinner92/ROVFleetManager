@@ -4,6 +4,8 @@ body{
 
 .title{
     text-align: center;
+    font-weight: bold;
+    padding-right: 20px;
 }
 
 .ROVheader{
@@ -64,7 +66,7 @@ td:first-child {
 
 /* CSS */
 button {
-  background-color: #a2a2a2;
+  background-color: #6b6b6b;
   border: 1px solid transparent;
   border-radius: 3px;
   box-shadow: rgba(255, 255, 255, .4) 0 1px 0 0 inset;

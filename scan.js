@@ -81,7 +81,7 @@
     // If it is not an ROV, or the request excedes the timeout, it will return undefined
     async function fetchRovId(ip){
         try{
-            const response = await axios.get(`http://${ip}:9101/v1.0/get/uniqueID`,{timeout: 1000})
+            const response = await axios.get(`http://${ip}:9101/v1.0/get/uniqueID`,{timeout: 2000})
             return response.data.id;
         }
         catch (error) {

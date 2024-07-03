@@ -127,14 +127,15 @@
                 timerState: this.timer.state,
                 timerText: this.timer.getTimeAsText(),
                 thumbnail: this.thumbnail,
-                preferredIp: this.preferredIp
+                preferredIp: this.preferredIp,
+                poweringOff: this.poweringOff
             });
         }
 
         // when response comes in, broadcast to all sockets
         getHeartbeat(){
             axios.get(`http://${this.preferredIp}/commander`,{timeout: 4000}).then(result => {
-                this.sendProperty({connected: true});
+                if(!this.poweringOff) this.sendProperty({connected: true});
             }).catch((error) => {
                 this.sendProperty({connected: false});
             })
@@ -207,11 +208,13 @@
             }
         }
         powerOff(){
+            this.poweringOff = true;
+            this.sendProperty({poweringOff: true});
             axios.post(`http://${this.preferredIp}:9100/v1.0/shutdown`, null, {params:{
                 i_know_what_i_am_doing: true,
                 "shutdown_type": "poweroff"
             }}).catch(err => {
-                console.log("Error posting name:",err);
+                console.log("Error shutting down:",err);
             });
         }
         setNotes(data, pushToRov){
@@ -288,7 +291,7 @@
     }
 
     function sendFullStateTo(socket){
-        socket.emit("fullState", constructRovState())
+        socket.emit("fullState", constructRovState());
     }
 
     function sendStateFragment(partialState){

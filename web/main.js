@@ -1,4 +1,5 @@
 const socket = io(window.location.origin); // Connect to Socket.IO server
+const localStorageEnabled = (typeof(Storage) !== "undefined");
 
 class ROV{
     constructor(id, state){
@@ -72,6 +73,9 @@ class ROV{
         if(state.hasOwnProperty("notes")) this._notesBox.value = state.notes;
         if(state.hasOwnProperty("connected")) this.setConnectionStatus(state.connected);
         if(state.hasOwnProperty("timerText")) this._timerText.innerText = state.timerText;
+        if(state.hasOwnProperty("poweringOff")){
+            this.disableForReason("Powering Off...");
+        }
         if(state.hasOwnProperty("timerState")){
             switch(state.timerState){
                 case "running":
@@ -117,8 +121,13 @@ class ROV{
         if(statusBool){
             this.setOpacity(1);
         }else{
-            this.setOpacity(0.4);
+            this.disableForReason("Connection Lost");
         }
+    }
+    disableForReason(reason){
+        this.ui.querySelector('.connectionStatus').innerText = reason;
+        this.ui.querySelector('.connectionStatus').style.display = "";
+        this.setOpacity(0.4);
     }
 }
 
@@ -203,6 +212,7 @@ function enableScanning(){
 function powerOffAll(){
     for(let i = 0; i < rovs.length; i++){
         if(rovs[i]){
+            rovs[i].disableForReason("Connection Lost");
             console.log(rovs[i].id,"powering off");
             triggerUserAction(rovs[i].id, "powerOff");
         }
@@ -217,7 +227,7 @@ socket.on('fullState', (state) => {
     console.log("got full state",state);
 
     // Assume that full state is from the last scan, therefore the scan is complete
-    setStatus('Scan complete')
+    setStatus("Ready for scan");
     document.getElementById('scanButton').style.display = 'unset';
     hideSpinner();
     enableScanning();
@@ -239,3 +249,10 @@ socket.on('scanInProgress', (idOfScanRequestor) => {
 socket.on('disconnect', () => {
     console.log('Disconnected from server');
 });
+
+// Local Storage to make IP string faster
+document.getElementById("ipString").addEventListener('change',result => {
+    if(localStorageEnabled) localStorage.setItem('ipString',document.getElementById("ipString").value);
+});
+
+if(localStorageEnabled) document.getElementById("ipString").value = localStorage.getItem("ipString");
