@@ -56,6 +56,111 @@
             this.rov.sendProperty({timerText: timeText});
         }
     }
+
+    class TimeTracker{
+        constructor(rov){
+            this.table = {};
+            this.rov = rov;
+            setInterval(()=>{
+                console.log(this.getAverages());
+            }, 2000);
+
+            this.goodAverages = {
+                name: 40,
+                thumbnail: 600,
+                mdns: 40,
+                notes: 40,
+                uptime: 650,
+                info: 40,
+                heartbeat: 60
+            }
+        }
+        makeNewRecord(){
+            return {
+                name:"",
+                start:0,
+                end:0,
+                duration:0
+            }
+        }
+        start(name){
+            if(!this.table[name]) this.table[name] = [];
+
+            this.table[name].push({
+                start:Date.now(),
+                end:0,
+                duration:0
+            });
+        }
+
+        stop(name){
+            let record = this.table[name][this.table[name].length-1];
+            //give 5 minutes of data for each name
+            if(record.start - this.table[name][0].start > 5*60*1000){
+                this.table[name].shift()
+            }
+            record.end = Date.now();
+            record.duration = record.end - record.start;
+            console.log("TimeTracker:",name,record.duration)
+
+            this.rov.sendProperty({pings: this.condense()});
+        }
+
+        condense(){
+            //y is duration, x is stoptime
+            let data = {};
+            data['thumbnail'] = [];
+            data['heartbeat'] = [];
+
+            if(this.table['thumbnail']) this.table['thumbnail'].forEach(record => {
+                if(record.duration){
+                    data['thumbnail'].push({
+                        x:record.end,
+                        y:record.duration
+                    })
+                }
+            });
+            if(this.table['heartbeat']) this.table['heartbeat'].forEach(record => {
+                if(record.duration){
+                    data['heartbeat'].push({
+                        x:record.end,
+                        y:record.duration
+                    })
+                }
+            });
+            
+
+            return data;
+        }
+
+        getAverages(){
+            let averages = {};
+            let names = Object.keys(this.table);
+            for(let i = 0; i < names.length; i++){
+                averages[names[i]] = this.findAverageOfRecord(this.table[names[i]]);
+            }
+            return averages;
+        }
+        findAverageOfRecord(records){
+            let average = 0;
+            for(let i = 0; i < records.length; i++){
+                let record = records[i];
+                average += record.duration;
+            }
+            // console.log(average,records.length)
+            average /= records.length;
+            return average;
+        }
+
+        compareAverages(){
+            let averages = this.getAverages();
+            let keys = Object.keys(this.goodAverages);
+            for(let i = 0; i < keys.length; i++){
+                averages[keys[i]]
+            }
+        }
+    }
+
     class ROV{
         constructor(id, scanResult){
             this.id = id;
@@ -63,6 +168,8 @@
             this.intervals = [];
             this.removed = false;
             this.timer = new Timer(this);
+            this.timeTracker = new TimeTracker(this);
+            this.name = scanResult?.name;
 
             if(this.ips) if(this.ips.length > 0) this.setpreferredIp(this.ips[0])
             
@@ -84,6 +191,7 @@
             // Start heartbeat + thumbnail
             this.intervals.push(setInterval(()=>{
                 this.getHeartbeat();
+                this.getInfo();
             }, 4000));
 
             this.intervals.push(setInterval(()=>{
@@ -107,6 +215,7 @@
             this.getMDNS();
             this.getNotes();
             this.getUptime();
+            this.getInfo();
         }
 
         mergeNewIps(newIps){
@@ -123,6 +232,7 @@
                 name: this.name,
                 uptime: this.uptime,
                 mdns: this.mdns,
+                info: this.info,
                 notes: this.notes,
                 timerState: this.timer.state,
                 timerText: this.timer.getTimeAsText(),
@@ -134,7 +244,9 @@
 
         // when response comes in, broadcast to all sockets
         getHeartbeat(){
+            this.timeTracker.start('heartbeat');
             axios.get(`http://${this.preferredIp}/commander`,{timeout: 4000}).then(result => {
+                this.timeTracker.stop('heartbeat');
                 if(!this.poweringOff) this.sendProperty({connected: true});
             }).catch((error) => {
                 this.sendProperty({connected: false});
@@ -145,7 +257,9 @@
                 i_know_what_i_am_doing: true,
                 command: "uptime -p"
             }
+            this.timeTracker.start('uptime');
             axios.post(`http://${this.preferredIp}:9100/v1.0/command/host`, null, {params:params}).then(result => {
+                this.timeTracker.stop('uptime');
                 let parsedUptime = "U" + result.data.stdout.replace(/^'|'$/g, '').replaceAll('\\n', '').slice(1);
                 this.setUptime(parsedUptime);
             }).catch((error) => {
@@ -153,28 +267,50 @@
             })
         }
         getThumbnail(){
+            this.timeTracker.start('thumbnail');
             axios.get(`http://${this.preferredIp}/mavlink-camera-manager/thumbnail?source=/dev/video0&quality=75&target_height=150`, {responseType: 'arraybuffer'}).then(result => {
+                this.timeTracker.stop('thumbnail');
                 this.setThumbnail(result.data);
             }).catch((error) => {
                 console.log('get name: ', error)
             })
         }
         getName(){
+            this.timeTracker.start('name');
             axios.get(`http://${this.preferredIp}:9111/v1.0/vehicle_name`).then(result => {
+                this.timeTracker.stop('name');
                 this.setName(result.data);
             }).catch((error) => {
                 console.log('get name: ', error)
             })
         }
         getMDNS(){
+            this.timeTracker.start('mdns');
             axios.get(`http://${this.preferredIp}:9111/v1.0/hostname`).then(result => {
+                this.timeTracker.stop('mdns');
                 this.setMdns(result.data);
             }).catch((error) => {
                 console.log('get mdns: ', error)
             })
         }
+        getInfo(){
+            this.timeTracker.start('info');
+            axios.get(`http://${this.preferredIp}:9101/v1.0/get/fleetManager`).then(result => {
+                this.timeTracker.stop('info');
+                let object = result.data;
+                let info = "";
+                getKeyValuePairs(object).forEach(pair => {
+                    info += `${pair.key}: ${JSON.stringify(pair.value)}\n`
+                })
+                this.setInfo(info);
+            }).catch((error) => {
+                console.log('get info: ', error)
+            })
+        }
         getNotes(){
+            this.timeTracker.start('notes');
             axios.get(`http://${this.preferredIp}:9101/v1.0/get/notes`).then(result => {
+                this.timeTracker.stop('notes');
                 this.setNotes(result.data);
             }).catch((error) => {
                 console.log('get notes: ', error)
@@ -185,9 +321,12 @@
             this.name = data;
             this.sendProperty({name: this.name});
             if(pushToRov){
+                this.timeTracker.start('name');
                 axios.post(`http://${this.preferredIp}:9111/v1.0/vehicle_name`, null, {params:{
                     name: this.name
-                }}).catch(err => {
+                }}).then(result => {
+                    this.timeTracker.stop('name');
+                }).catch(err => {
                     console.log("Error posting name:",err);
                 });
             }
@@ -200,9 +339,12 @@
             this.mdns = data;
             this.sendProperty({mdns: this.mdns});
             if(pushToRov){
+                this.timeTracker.start('mdns');
                 axios.post(`http://${this.preferredIp}:9111/v1.0/hostname`, null, {params:{
                     hostname: this.mdns
-                }}).catch(err => {
+                }}).then(resp => {
+                    this.timeTracker.stop('mdns');
+                }).catch(err => {
                     console.log("Error posting mdns:",err);
                 });
             }
@@ -217,11 +359,18 @@
                 console.log("Error shutting down:",err);
             });
         }
+        setInfo(data){
+            this.info = data;
+            this.sendProperty({info: this.info});
+        }
         setNotes(data, pushToRov){
             this.notes = data;
             this.sendProperty({notes: this.notes});
             if(pushToRov){
-                axios.post(`http://${this.preferredIp}:9101/v1.0/set/notes`,this.notes,{ headers: {'Content-Type': 'application/json'} }).catch(err => {
+                this.timeTracker.start('notes');
+                axios.post(`http://${this.preferredIp}:9101/v1.0/set/notes`,this.notes,{ headers: {'Content-Type': 'application/json'} }).then(value => {
+                    this.timeTracker.stop('notes');
+                }).catch(err => {
                     console.log("Error posting notes:",err);
                 });
             }
@@ -336,6 +485,27 @@
                 rov.setpreferredIp(data);
                 break;
         }
+    }
+
+    function getKeyValuePairs(obj, parentKey = '') {
+        let result = [];
+    
+        for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                const value = obj[key];
+                const newKey = parentKey ? `${parentKey}.${key}` : key;
+    
+                if (typeof value === 'object' && value !== null) {
+                    // Recursively retrieve pairs from nested objects
+                    result = result.concat(getKeyValuePairs(value, newKey));
+                } else {
+                    // Push the key-value pair to the result array
+                    result.push({ key: newKey, value: value });
+                }
+            }
+        }
+    
+        return result;
     }
 
     module.exports.setBroadcastFunction = function(broadcastFunction){

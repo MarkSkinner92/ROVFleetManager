@@ -33,17 +33,27 @@ io.on('connection', (socket) => {
     socket.on("scan", (ipRange) => {
         io.emit("scanInProgress",socket.id);
 
-        // rovManager.mergeScanResults({
-        //     "rov-7smbx81u":{ips:["192.168.1.4","192.168.1.78"]},
-        //     'rov-erysu0x2': { ips: [ '192.168.1.185' ] },
-        // })
-        // rovManager.sendFullStateTo(io);
-        console.log("scanning...");
-        scanner.scan(ipRange).then( result => {
-            console.log("got scan results");
-            rovManager.mergeScanResults(result);
+        const USE_FAKE_DATA = false;
+
+        if(USE_FAKE_DATA){
+            rovManager.mergeScanResults({
+                "rov-7smbx81u":{ips:["192.168.1.4","192.168.1.78"], name:"ROV 8"},
+                'rov-erysu0x2': { ips: [ '192.168.1.185' ], name:"ROV 1" },
+                'rov-erysu0x3': { ips: [ '192.168.1.185' ], name:"ROV 7" },
+                'rov-erysu0x4': { ips: [ '192.168.1.185' ], name:"ROV 4" },
+                'rov-erysu0x5': { ips: [ '192.168.1.185' ], name:"ROV 2" },
+                'rov-erysu0x6': { ips: [ '192.168.1.185' ], name:"ROV 3" },
+            })
             rovManager.sendFullStateTo(io);
-        });
+        }
+        else{
+            console.log("scanning...");
+            scanner.scan(ipRange).then( result => {
+                console.log("got scan results");
+                rovManager.mergeScanResults(result);
+                rovManager.sendFullStateTo(io);
+            });
+        }
 
     })
 });

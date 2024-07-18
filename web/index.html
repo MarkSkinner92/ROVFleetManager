@@ -4,7 +4,7 @@
         <title>ROV Fleet Manager</title>
         <link rel= "stylesheet" type= "text/css" href= "style.css">
         <script src="https://cdn.socket.io/4.3.1/socket.io.js"></script> <!-- Include Socket.IO client library -->
-        
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     </head>
     <body>
         <div class='ROVheader'>
@@ -13,6 +13,8 @@
             <button id='scanButton' onclick="scan()">Scan</button>
             <img id="spinner" src="loading.gif" style="height:20px; display: none;">
             <p id='statusText' class='inlinetext'>Status: Ready</p>
+            <p id="num-connected" class='inlinetext' style="margin-left:20px">0 connected</p>
+            <p id="num-active" class='inlinetext' style="margin-left:5px; display:none">0 active</p>
             <button style="float:right" onclick="powerOffAll()">Power Off All</button>
         </div>
         <div id='ROVcontainer'>
@@ -37,11 +39,11 @@
                             </div>
                         </td>
                         <td>
-                            <p class='battery'>Battery: ---</p>
-                            <p class='temperature'>Temperature: ---</p>
+                            <p class="boxTitle">Info</p>
+                            <textarea readonly class="infoBox"></textarea>
                         </td>
                         <td>
-                            <p>Notes</p>
+                            <p class="boxTitle">Notes</p>
                             <textarea class='notesBox' style="width: 258px; height: 86px;"></textarea>
                         </td>
                         <td>
@@ -55,6 +57,10 @@
                         </td>
                     </tr>
                 </table>
+                <div class="networkInformation">
+                    <p>Network Information</p>
+                    <canvas class="networkChart" width="600" height="300"></canvas>
+                </div>
             </div>
         </div>
 

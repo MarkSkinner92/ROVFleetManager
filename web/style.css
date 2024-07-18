@@ -8,13 +8,22 @@ body{
     padding-right: 20px;
 }
 
+#ROVcontainer{
+    margin-top:60px;
+    display: flex;
+    flex-direction: column;
+}
+
 .ROVheader{
     width: 100%;
     height: 50px;
     background-color: rgb(129 214 255);
-    border-radius: 5px;
     box-sizing: border-box;
     padding: 10px;
+    position: fixed;
+    z-index:100;
+    top:0px;
+    left:0px;
 }
 
 .ROV{
@@ -25,8 +34,12 @@ body{
     box-sizing: border-box;
     padding: 5px;
     margin-top: 5px;
+    order: 0;
 }
 
+.networkInformation{
+    border-top: 1px solid rgb(163, 163, 163);
+}
 
 table {
     border-collapse: collapse;
@@ -53,6 +66,16 @@ td:first-child {
     display: inline;
 }
 
+.boxTitle{
+    margin: 0px;
+}
+
+.infoBox{
+    width: 100px;
+    height: 86px;
+    border: none;
+}
+
 .networkFailOverlay{
     position: absolute;
     left: 0px;
@@ -63,8 +86,6 @@ td:first-child {
     display: none;
 }
 
-
-/* CSS */
 button {
   background-color: #6b6b6b;
   border: 1px solid transparent;
