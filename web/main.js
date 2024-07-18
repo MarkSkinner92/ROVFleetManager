@@ -24,6 +24,7 @@ class ROV{
         this._cockpitButton = this.ui.querySelector(".openCockpitButton");
         this._mdns = this.ui.querySelector(".mdns");
         this._infoBox = this.ui.querySelector(".infoBox");
+        this._networkToggle = this.ui.querySelector(".networkToggle");
         this._notesBox = this.ui.querySelector(".notesBox");
         this._battery = this.ui.querySelector(".battery");
         this._temperature = this.ui.querySelector(".temperature");
@@ -52,6 +53,9 @@ class ROV{
             let cockpitURL = `http://${this.preferredIp}/extension/cockpit?full_page=true`;
             window.open(cockpitURL,"_blank");
         });
+        this._networkToggle.addEventListener('click',()=>{
+            this.toggleNetworkBox()
+        });
         this._notesBox.addEventListener('change',()=>{
             triggerUserAction(this.id, "notes", this._notesBox.value);
         });
@@ -79,7 +83,7 @@ class ROV{
         if(state.hasOwnProperty("mdns")) this._mdns.value = state.mdns;
         if(state.hasOwnProperty("info")) this._infoBox.value = state.info;
         if(state.hasOwnProperty("notes")) this._notesBox.value = state.notes;
-        // if(state.hasOwnProperty("connected")) this.setConnectionStatus(state.connected); //TODO turn back on
+        if(state.hasOwnProperty("connected")) this.setConnectionStatus(state.connected);
         if(state.hasOwnProperty("timerText")) this._timerText.innerText = state.timerText;
         if(state.hasOwnProperty("poweringOff")){
             this.disableForReason("Powering Off...");
@@ -132,13 +136,21 @@ class ROV{
         if(statusBool){
             this.setOpacity(1);
         }else{
-            this.disableForReason("Connection Lost");
+            this.disableForReason("Connection Unstable");
         }
     }
     disableForReason(reason){
         this.ui.querySelector('.connectionStatus').innerText = reason;
         this.ui.querySelector('.connectionStatus').style.display = "";
-        this.setOpacity(0.4);
+        // this.setOpacity(0.4);
+    }
+
+    toggleNetworkBox(){
+        if(this._network.style.display != 'none'){
+            this._network.style.display = 'none';
+        }else{
+            this._network.style.display = 'block';
+        }
     }
 
     updateChart(pings){
@@ -153,6 +165,16 @@ class ROV{
                     label: 'Heartbeat (4s)',
                     borderColor: 'rgb(54, 162, 235)',
                     data: pings['heartbeat'],
+                },
+                {
+                    label: 'Info (4s)',
+                    borderColor: '#D5B60A',
+                    data: pings['info'],
+                },
+                {
+                    label: 'Uptime (30s)',
+                    borderColor: '#OB6623',
+                    data: pings['uptime'],
                 }
             ]
         }
@@ -169,8 +191,8 @@ class ROV{
             type: 'line',
             data: data,
             options: {
-                responsive: false,
-                maintainAspectRation:false,
+                responsive: true,
+                maintainAspectRatio:false,
                 animation: {
                     duration: 0 // general animation time
                 },
@@ -180,7 +202,7 @@ class ROV{
                     },
                     title: {
                         display: true,
-                        text: 'Round Trip Request Times'
+                        text: 'Round Trip Request Times (X axis: Time of response, Y axis: Time waiting for response)'
                     },
                     tooltip:{
                         callbacks:{

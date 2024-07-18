@@ -41,6 +41,15 @@ body{
     border-top: 1px solid rgb(163, 163, 163);
 }
 
+.chartHolder{
+    height:400px;
+}
+
+/* .networkChart{
+    width:1000px !important;
+    height:600px !important;
+} */
+
 table {
     border-collapse: collapse;
     width: 100%;

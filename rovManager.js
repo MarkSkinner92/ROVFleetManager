@@ -95,8 +95,8 @@
 
         stop(name){
             let record = this.table[name][this.table[name].length-1];
-            //give 5 minutes of data for each name
-            if(record.start - this.table[name][0].start > 5*60*1000){
+            //give 10 minutes of data for each name
+            if(record.start - this.table[name][0].start > 10*60*1000){
                 this.table[name].shift()
             }
             record.end = Date.now();
@@ -111,6 +111,8 @@
             let data = {};
             data['thumbnail'] = [];
             data['heartbeat'] = [];
+            data['info'] = [];
+            data['uptime'] = [];
 
             if(this.table['thumbnail']) this.table['thumbnail'].forEach(record => {
                 if(record.duration){
@@ -123,6 +125,22 @@
             if(this.table['heartbeat']) this.table['heartbeat'].forEach(record => {
                 if(record.duration){
                     data['heartbeat'].push({
+                        x:record.end,
+                        y:record.duration
+                    })
+                }
+            });
+            if(this.table['info']) this.table['info'].forEach(record => {
+                if(record.duration){
+                    data['info'].push({
+                        x:record.end,
+                        y:record.duration
+                    })
+                }
+            });
+            if(this.table['uptime']) this.table['uptime'].forEach(record => {
+                if(record.duration){
+                    data['uptime'].push({
                         x:record.end,
                         y:record.duration
                     })

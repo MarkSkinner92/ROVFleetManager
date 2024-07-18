@@ -40,7 +40,8 @@
                         </td>
                         <td>
                             <p class="boxTitle">Info</p>
-                            <textarea readonly class="infoBox"></textarea>
+                            <textarea readonly class="infoBox"></textarea><br>
+                            <button class="networkToggle">Toggle Network Info</button>
                         </td>
                         <td>
                             <p class="boxTitle">Notes</p>
@@ -58,8 +59,11 @@
                     </tr>
                 </table>
                 <div class="networkInformation">
-                    <p>Network Information</p>
-                    <canvas class="networkChart" width="600" height="300"></canvas>
+                    <p><b>Network Status</b></p>
+                    <p>This chart shows the amount of time it takes for the ROV to get a request from the Fleet Manager Server, process it, and return it to the Fleet Manager Server. The time in milliseconds includes two network trips, and ROV processing time.</p>
+                    <div class="chartHolder">
+                        <canvas class="networkChart" width="1000",height="400"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
