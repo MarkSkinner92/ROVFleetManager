@@ -37,7 +37,6 @@ class ROV{
         // Set up events
         this._name.addEventListener('change',()=>{
             triggerUserAction(this.id, "name", this._name.value);
-            sortROVs();
         });
         this._mdns.addEventListener('change',()=>{
             triggerUserAction(this.id, "mdns", this._mdns.value);
@@ -260,7 +259,6 @@ function mergeState(newState){
     });
 
     updateConnectedCount(rovs.length);
-    sortROVs();
 }
 
 function triggerUserAction(rovId, action, data){
@@ -342,6 +340,13 @@ function sortROVs(){
     rovs.forEach((rov, index) => {
         rov.ui.style.order = index+1;
     })
+}
+
+// Look to see if we should turn
+function setAllNetwork(show){
+    rovs.forEach(rov => {
+        rov._network.style.display = show ? 'block' : 'none';
+    });
 }
 
 socket.on('connect', () => {
