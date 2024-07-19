@@ -33,7 +33,7 @@ io.on('connection', (socket) => {
     socket.on("scan", (ipRange) => {
         io.emit("scanInProgress",socket.id);
 
-        const USE_FAKE_DATA = true;
+        const USE_FAKE_DATA = false;
 
         if(USE_FAKE_DATA){
             rovManager.mergeScanResults({
