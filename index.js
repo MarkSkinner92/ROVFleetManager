@@ -48,10 +48,12 @@ io.on('connection', (socket) => {
         }
         else{
             console.log("scanning...");
-            scanner.scan(ipRange).then( result => {
-                console.log("got scan results");
-                rovManager.mergeScanResults(result);
+            scanner.scan(ipRange, (data)=>{
+                //scan resuls came in
+                rovManager.mergeScanResults(data);
                 rovManager.sendFullStateTo(io);
+            },()=>{
+                //scan is done
             });
         }
 

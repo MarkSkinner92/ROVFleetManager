@@ -5,29 +5,29 @@
 
     // TODO: Need to test with a ROV having multiple IPs
     // TODO: Need to test with an ROV not having an ID, but having multiple IPs. Will it work reliably?
-    function scan(scanString){
-        return new Promise((resolve, reject) => {
-            ips = generateAddressPossibilities(scanString);
+    function scan(scanString, updates, done){
+        ips = generateAddressPossibilities(scanString);
+        console.log(updates);
 
-            let rovIds = {};
+        let rovIds = {};
 
-            let numReceived = 0;
-            ips.forEach(ip => {
-                console.log("fetching:",ip);
-                fetchRovId(ip)
-                .then(result => {
-                    numReceived++;
-                    if(result){
-                        if(!rovIds[result]) rovIds[result] = {ips:[ip]};
-                        else{
-                            rovIds[result].ips.push(ip);
-                        }
+        let numReceived = 0;
+        ips.forEach(ip => {
+            console.log("fetching:",ip);
+            fetchRovId(ip)
+            .then(result => {
+                numReceived++;
+                if(result){
+                    if(!rovIds[result]) rovIds[result] = {ips:[ip]};
+                    else{
+                        rovIds[result].ips.push(ip);
                     }
-                    if(numReceived == ips.length){
-                        // Scan complete! return results
-                        resolve(rovIds);
-                    }
-                });
+                    updates(rovIds);
+                }
+
+                if(numReceived == ips.length){
+                    done();
+                }
             });
         });
     }
@@ -76,44 +76,31 @@
         return allIPs;
     }
 
-    // Will return the uniqueID.id property in the bag of holding if it exists.
-    // If it doesn't exist, it will create one and return it.
-    // If it is not an ROV, or the request excedes the timeout, it will return undefined
+
+    // Sends a post request to each IP asking to run a command to get the cpu serial number
+    // If it comes back, then 1. It's an ROV, and 2. It has a unique device ID we can use
     async function fetchRovId(ip){
+        const COMMAND = `cat /proc/cpuinfo | grep Serial | awk '{print $3}'`;
+
+        let params = {
+            i_know_what_i_am_doing: true,
+            command: COMMAND
+        }
+
         try{
-            const response = await axios.get(`http://${ip}:9101/v1.0/get/uniqueID`,{timeout: 2000})
-            return response.data.id;
+            const response = await axios.post(`http://${ip}:9100/v1.0/command/host`, null, {params, timeout:4000})
+            const serialNumber = response.data.stdout.replace('\\n','');
+            console.log(serialNumber);
+            return serialNumber;
         }
         catch (error) {
-            if(error.code == "ERR_BAD_REQUEST"){
-                // The IP is valid, but a unique ID has not been assigned.
-                // We will asign it a unique ID here
-                let newId = generateRandomId();
-                return await setRovId(ip, newId);
-            }
+            return undefined;
         };
     }
 
-    // Sets it in the bag of holding
-    async function setRovId(ip, id){
-        try{
-            const response = await axios.post(`http://${ip}:9101/v1.0/set/uniqueID`, {id})
-            return id;
-        }
-        catch (error) {
-            throw error;
-        }
-    }
-
-    function generateRandomId() {
-        const id = "rov-" + Math.random().toString(36).substring(2, 10); // Generates an 10-character random string
-        return id;
-    }
-
     // Exports -----
-
-    module.exports.scan = function(ipString) {
-        return scan(ipString);
+    module.exports.scan = function(ipString, updates, done) {
+        return scan(ipString, updates, done);
     }
 
 }());
