@@ -54,6 +54,7 @@ io.on('connection', (socket) => {
                 rovManager.sendFullStateTo(io);
             },()=>{
                 //scan is done
+                rovManager.sendFullStateTo(io);
             });
         }
 
