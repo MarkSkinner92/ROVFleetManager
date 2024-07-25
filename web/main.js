@@ -80,7 +80,10 @@ class ROV{
         if(state.hasOwnProperty("name")) this._name.value = state.name;
         if(state.hasOwnProperty("uptime")) this._uptime.innerText = state.uptime;
         if(state.hasOwnProperty("mdns")) this._mdns.value = state.mdns;
-        if(state.hasOwnProperty("info")) this._infoBox.value = state.info;
+        if(state.hasOwnProperty("info")){
+            this._infoBox.value = state.info;
+            this.processInfo(state.info);
+        }
         if(state.hasOwnProperty("notes")) this._notesBox.value = state.notes;
         if(state.hasOwnProperty("connected")) this.setConnectionStatus(state.connected);
         if(state.hasOwnProperty("timerText")) this._timerText.innerText = state.timerText;
@@ -128,6 +131,30 @@ class ROV{
 
     setOpacity(opacity){
         this.ui.style.filter = `opacity(${opacity})`;
+    }
+
+    setBackgroundColor(color){
+        this.ui.style.background = color;
+    }
+
+    processInfo(info){
+        let connections = 0;
+
+        let lines = info.split("\n")
+        for(let line of lines){
+            let segments = line.split(":")
+            if(segments[0] == 'connections'){
+                connections = parseInt(segments[1]);
+            }
+        }
+
+        if(connections == 0){
+            this.setBackgroundColor("#d8d8d8");
+        }else if(connections == 1){
+            this.setBackgroundColor("#ebffdd");
+        }else if(connections > 1){
+            this.setBackgroundColor("#ffdddd");
+        }
     }
 
     setConnectionStatus(statusBool){
