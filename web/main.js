@@ -172,10 +172,11 @@ class ROV{
     }
 
     toggleNetworkBox(){
-        if(this._network.style.display != 'none'){
-            this._network.style.display = 'none';
-        }else{
+        console.log(this._network.style.display);
+        if(this._network.style.display == 'none' || this._network.style.display == ""){
             this._network.style.display = 'block';
+        }else{
+            this._network.style.display = 'none';
         }
     }
 
