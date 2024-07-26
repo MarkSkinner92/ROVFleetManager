@@ -381,6 +381,10 @@
             this.info = data;
             this.sendProperty({info: this.info});
         }
+        startSpeedTest(){
+            axios.get(`http://${this.preferredIp}:5000/speedtest`);
+            console.log("speed test request sent")
+        }
         setNotes(data, pushToRov){
             this.notes = data;
             this.sendProperty({notes: this.notes});
@@ -501,6 +505,9 @@
                 break;
             case 'selectIp':
                 rov.setpreferredIp(data);
+                break;
+            case 'startSpeedTest':
+                rov.startSpeedTest();
                 break;
         }
     }

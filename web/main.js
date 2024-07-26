@@ -25,6 +25,7 @@ class ROV{
         this._mdns = this.ui.querySelector(".mdns");
         this._infoBox = this.ui.querySelector(".infoBox");
         this._networkToggle = this.ui.querySelector(".networkToggle");
+        this._speedTestButton = this.ui.querySelector(".speedTestButton");
         this._notesBox = this.ui.querySelector(".notesBox");
         this._battery = this.ui.querySelector(".battery");
         this._temperature = this.ui.querySelector(".temperature");
@@ -67,6 +68,19 @@ class ROV{
         this._timerReset.addEventListener('click',()=>{
             triggerUserAction(this.id, "timerReset");
         });
+        this._speedTestButton.addEventListener('click',()=>{
+            triggerUserAction(this.id, "startSpeedTest");
+            let previousText = this._speedTestButton.innerText;
+            this._speedTestButton.innerText = "Running speed test... you will see the results in the info section";
+            this._speedTestButton.style.opacity = 0.5;
+            this._speedTestButton.disabled = true;
+            setTimeout(() => {
+                this._speedTestButton.style.display = 'block';
+                this._speedTestButton.innerText = previousText;
+                this._speedTestButton.style.opacity = 1;
+                this._speedTestButton.disabled = false;
+            }, 20 * 1000)
+        })
 
         this._network = this.ui.querySelector(".networkInformation");
         this._networkChart = this.ui.querySelector(".networkChart");
@@ -150,10 +164,14 @@ class ROV{
 
         if(connections == 0){
             this.setBackgroundColor("#d8d8d8");
-        }else if(connections == 1){
-            this.setBackgroundColor("#ebffdd");
-        }else if(connections > 1){
-            this.setBackgroundColor("#ffdddd");
+            this._speedTestButton.style.display = 'none';
+        }else{
+            this._speedTestButton.style.display = 'block';
+            if(connections == 1){
+                this.setBackgroundColor("#ebffdd");
+            }else if(connections > 1){
+                this.setBackgroundColor("#ffdddd");
+            }
         }
     }
 
